@@ -406,5 +406,9 @@ OpenCover/
 #Debugging Files
 out.txt
 
-#Old
+#Old, Spec
 old/*
+spec*
+README.txt
+Error_messages.txt
+Project4_W22.pdf
