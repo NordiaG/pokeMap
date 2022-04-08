@@ -12,42 +12,41 @@
 enum class algorit {
 	MST = 0,
 	FASTTSP,
-	OSTTSP
+	OPTTSP
 };
 
 class path{
 public:
-    void getOptions(int argc, char ** argv);
+    void getOptions(int &argc, char ** &argv);
     void readInputA();
     void readInputB();
     double distanceHelper(int index1, int index2);
     void mst();
     void fastTsp();
     void optTsp();
-
     algorit mode = algorit::MST;
 
-    struct cageA {
-		pair<int, int> coords;
-		char loc; //where in the zoo: wild, safe, or border
-		cageA():loc('\0') {}
-		cageA(pair<int, int> temp) : coords(temp), loc('\0') {}
-		cageA(pair<int, int> coord, char temp) : coords(coord), loc(temp) {}
+    struct pokeLocA {
+		std::pair<int, int> coords;
+		char loc; //where in the world: water, land, or border
+		pokeLocA():loc('\0') {}
+		pokeLocA(std::pair<int, int> temp) : coords(temp), loc('\0') {}
+		pokeLocA(std::pair<int, int> coord, char temp) : coords(coord), loc(temp) {}
 	};
 	struct Table {
 		double distance;
-		char table;
+		bool table;
 		int32_t previous;
 		
-		Table(): distance(INFINITY), table('F'), previous(0) {}
+		Table(): distance(INFINITY), table(false), previous(0) {}
 	};
 
 private:
-    int numCages = 0;
-	vector<int> path;
-	vector<cageA> Acoords;
-	vector<Table> prims;
-	vector<pair<int,int>> Bcoords;
+    int numPokemon = 0;
+	std::vector<int> path;
+	std::vector<pokeLocA> Acoords;
+	std::vector<Table> prims;
+	std::vector<std::pair<int,int>> Bcoords;
 	double currentCost;
 	double distanceA(int index1, int index2);
 	double distanceBC(int index1, int index2);

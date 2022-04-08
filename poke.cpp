@@ -9,6 +9,7 @@ int main(int argc, char* argv[]) {
 	cout << setprecision(2);
 	cout << fixed;
 	graph.getOptions(argc, argv);
+
 	switch (graph.mode){
 	case algorit::MST:
 		graph.readInputA();
@@ -18,7 +19,7 @@ int main(int argc, char* argv[]) {
 		graph.readInputB();
 		graph.fastTsp();
 		break;
-	case algorit::OSTTSP:
+	case algorit::OPTTSP:
 		graph.readInputB();
         graph.optTsp();
 		break;
