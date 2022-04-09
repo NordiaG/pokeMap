@@ -128,7 +128,7 @@ void path::mst() {
 		currentCost += sqrt(min);
 		for (int k = 0; k < numPokemon; ++k) {
 			if (!prims[k].table) {
-				double d = distanceHelper(minIndex, k);
+				double d = distanceA(minIndex, k);
 				if (d < prims[k].distance) {
 					prims[k].distance = d;
 					prims[k].previous = minIndex;
@@ -154,14 +154,27 @@ void path::fastTsp(){
 	path.push_back(0);
 	int minIndex = 0;
 	currentCost = distanceHelper(0,1) + distanceHelper(1,2) + distanceHelper(2,0);
-	for(int i = 3; i < numPokemon; ++i){
+	for(int k = 3; k < numPokemon; ++k){
 		double min = INFINITY;
-		for(size_t j = 0; path.size(); ++j){
-			
+		for(int i = 0; i < (int)path.size()-1; ++i){
+			if(distanceHelper(i,k) + distanceHelper(k,path[i]) - distanceBC(i,path[i]) < min){
+				min = distanceHelper(i,k) + distanceHelper(k,path[i]) - distanceBC(i,path[i]);
+				minIndex = i;
+			}
 		}
+		currentCost += min;
+		path.resize(path.size()+1);
+		path[k] = path[minIndex];
+		path[minIndex] = k;
 	}
+	cout << currentCost << '\n';
+	int start = 0;
+	do {
+    	cout << start << ' ';
+    	start = path[start];
+	} while (start != 0);
 }
 
 void path::optTsp(){
-
+	
 }
