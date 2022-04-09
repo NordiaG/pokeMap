@@ -409,7 +409,9 @@ out.txt
 #Old, Spec
 old/*
 spec*
+poke_debug
 README.txt
+result.txt
 Error_messages.txt
 Project4_W22.pdf
 fullsubmit.tar.gz
