@@ -24,9 +24,10 @@ public:
     void mst();
     void fastTsp();
     void optTsp();
+	void upperBoundGen();
+	bool promising(size_t permLength);
     algorit mode = algorit::MST;
-
-    struct pokeLocA {
+	struct pokeLocA {
 		std::pair<int, int> coords;
 		char loc; //where in the world: water, land, or border
 		pokeLocA():loc('\0') {}
@@ -40,14 +41,23 @@ public:
 		
 		Table(): distance(INFINITY), table(false), previous(0) {}
 	};
-
+	
+	void genPerms(size_t permLength);
 private:
+	double partialMST(size_t permLength);
+	void distTable();
     int numPokemon = 0;
 	std::vector<int> path;
+
 	std::vector<pokeLocA> Acoords;
 	std::vector<Table> prims;
+
 	std::vector<std::pair<int,int>> Bcoords;
-	double currentCost;
+	std::vector<int> boundingPath;
+	std::vector<vector<double>> distanceT;
+	double currentCost = 0.0;
+	double upperBoundCost = 0.0;
 	double distanceA(int index1, int index2);
 	double distanceBC(int index1, int index2);
 };
+
