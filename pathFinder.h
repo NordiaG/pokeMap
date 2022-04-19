@@ -54,9 +54,9 @@ private:
 
 	std::vector<std::pair<int,int>> Bcoords;
 	std::vector<int> boundingPath;
-	std::vector<vector<double>> distanceT;
+	std::vector<std::vector<double>> distanceT;
 	double currentCost = 0.0;
-	double upperBoundCost = 0.0;
+	double bestCost = 0.0;
 	double distanceA(int index1, int index2);
 	double distanceBC(int index1, int index2);
 };
