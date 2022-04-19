@@ -7,7 +7,7 @@ using namespace std;
 int main(int argc, char* argv[]) {
 	path graph;
 	cerr << fixed << showpoint << setprecision(2);
-	cout << setprecision(2);
+	cout << setprecision(2) << boolalpha;
 	cout << fixed;
 	graph.getOptions(argc, argv);
 
