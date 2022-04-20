@@ -48,7 +48,7 @@ private:
 	void distTable();
     int numPokemon = 0;
 	std::vector<int> path;
-
+	
 	std::vector<pokeLocA> Acoords;
 	std::vector<Table> prims;
 
@@ -56,6 +56,7 @@ private:
 	std::vector<int> boundingPath;
 	std::vector<std::vector<double>> distanceT;
 	double currentCost = 0.0;
+	double totalEst = 0.0;
 	double bestCost = 0.0;
 	double distanceA(int index1, int index2);
 	double distanceBC(int index1, int index2);
