@@ -31,7 +31,7 @@ void path::getOptions(int &argc, char** &argv){
 			}
 			break;
         case 'h':
-            cout
+            cout << "Pokemon path finder\n"
 			<< "Usage: \'./poke\n\t[--mode| -m] <MST|FASTTSP,OSTTSP>\n"
 			<< "\t[--help | -h]";
 			exit(0);
@@ -115,7 +115,7 @@ void path::mst() {
 		double min = INFINITY;
 		for (int j = 0; j < numPokemon; ++j) {			
 			double temp = prims[j].distance;
-			if (temp < min && !prims[j].table) {
+			if(temp < min && !prims[j].table) {
 				min = temp;
 				minIndex = j;
 			}
@@ -153,71 +153,83 @@ void path::fastTsp(){
 	path.push_back(1);
 	path.push_back(2);
 	int minIndex = 0;
-	currentCost = distanceHelper(0,1) + distanceHelper(1,2) + distanceHelper(2,0);
+	currentCost = distanceBC(0,1) + distanceBC(1,2) + distanceBC(2,0);
 	for(int k = 3; k < numPokemon; ++k){
 		double min = INFINITY;
+		double dist = 0.0;
 		for(int i = 0; i < (int)path.size()-1; ++i){
-			if(distanceBC(i,k) + distanceBC(k,path[i]) - distanceBC(i,path[i]) < min){
-				min = distanceBC(i,k) + distanceBC(k,path[i]) - distanceBC(i,path[i]);
+			dist = distanceBC(path[i],k) + distanceBC(k,path[i+1]) - distanceBC(path[i],path[i+1]);
+			if(dist < min){
+				min = dist;
 				minIndex = i + 1;
 			}
 		}
+		dist = distanceBC(path.back(),k) + distanceBC(path[0],k) - distanceBC(path[0],path.back());
+		if(dist < min){
+		 	min = dist;
+		  	path.push_back(k);
+		}else{
+			path.insert(path.begin() + minIndex, k);
+		}
 		currentCost += min;
-		path.insert(path.begin() + minIndex, k);
 	}
 	cout << currentCost << '\n';
 	for(int i = 0; i < numPokemon; ++i){
 		cout << path[i] << ' ';
 	}
-	//check weight
 }
 
 void path::upperBoundGen(){
 	path.reserve(numPokemon); 
+	path.push_back(0);
 	path.push_back(1);
 	path.push_back(2);
-	path.push_back(0);
 	int minIndex = 0;
 	bestCost = distanceHelper(0,1) + distanceHelper(1,2) + distanceHelper(2,0);
 	for(int k = 3; k < numPokemon; ++k){
 		double min = INFINITY;
+		double dist = 0.0;
 		for(int i = 0; i < (int)path.size()-1; ++i){
-			if(distanceHelper(i,k) + distanceHelper(k,path[i]) - distanceBC(i,path[i]) < min){
-				min = distanceHelper(i,k) + distanceHelper(k,path[i]) - distanceBC(i,path[i]);
-				minIndex = i;
+			dist = distanceBC(path[i],k) + distanceBC(k,path[i+1]) - distanceBC(path[i],path[i+1]);
+			if(dist < min){
+				min = dist;
+				minIndex = i + 1;
 			}
 		}
+		dist = distanceBC(path.back(),k) + distanceBC(path[0],k) - distanceBC(path[0],path.back());
+		if(dist < min){
+		 	min = dist;
+		  	path.push_back(k);
+		}else{
+			path.insert(path.begin() + minIndex, k);
+		}
 		bestCost += min;
-		path.resize(path.size()+1);
-		path[k] = path[minIndex];
-		path[minIndex] = k;
 	}
 }
 
 double path::partialMST(size_t permLength){
-	int newSize = numPokemon - (int)permLength;
 	prims.clear();
-	prims.resize(newSize, Table());
-	prims[0].distance = 0;
+	prims.resize(numPokemon, Table());
+	prims[path[permLength]].distance = 0;
 	double partialCost = 0.0;
-	for (int i = 0; i < newSize; ++i) {
+
+	for (int i = (int)permLength; i < numPokemon; ++i) {
 		int minIndex = -1;
 		double min = INFINITY;
-		for (int j = 0; j < newSize; ++j) {			
-			double temp = prims[j].distance;
-			if (temp < min && !prims[j].table) {
+		for (int j = (int)permLength; j < numPokemon; ++j) {			
+			double temp = prims[path[j]].distance;
+			if (temp < min && !prims[path[j]].table) {
 				min = temp;
 				minIndex = j;
 			}
-		}//min index + weight finder
-		prims[minIndex].table = true;
+		}
+		prims[path[minIndex]].table = true;
 		partialCost += min;
-		for (int k = 0; k < newSize; ++k) {
-			if (!prims[k].table){
-				double d = distanceT[minIndex+permLength][k+permLength];
-				if (d < prims[k].distance) {
-					prims[k].distance = d;
-					prims[k].previous = minIndex;
+		for (int k = (int)permLength; k < numPokemon; ++k) {
+			if (!prims[path[k]].table){
+				double d = distanceT[path[minIndex]][path[k]];
+				if (d < prims[path[k]].distance) {
+					prims[path[k]].distance = d;
 				}
 			}
 		}
@@ -230,15 +242,13 @@ bool path::promising(size_t permLength){
 	currentCost = 0.0;
 	bool promise = true;
 	double arm1Len = INFINITY, arm2Len = INFINITY;
-	int i = 0;
-	for(size_t j = 0; j < permLength - 1; ++j){
-		currentCost += distanceT[i][path[i]];
-		i = path[i];
+	
+	for(size_t j = 0; j < permLength - 1; ++j){//curCost
+		currentCost += distanceT[path[j]][path[j+1]];
 	}
-
-	for(size_t i = permLength; i < (size_t)numPokemon; ++i){
-		if(distanceT[path[0]][path[i]] < arm1Len){
-			arm1Len = distanceT[path[0]][path[i]];
+	for(size_t i = permLength; i < (size_t)numPokemon; ++i){//arms
+		if(distanceT[0][path[i]] < arm1Len){
+			arm1Len = distanceT[0][path[i]];
 		}
 		if(distanceT[path[permLength-1]][path[i]] < arm2Len){
 			arm2Len = distanceT[path[permLength-1]][path[i]];
@@ -246,20 +256,16 @@ bool path::promising(size_t permLength){
 	}
 
 	mstCost = partialMST(permLength);
-	double totalEst = currentCost + mstCost + arm1Len + arm2Len;
-	int start = 0;
-	do {
-    	cerr << start << ' ';
-    	start = path[start];
-	} while (start != 0);//change to normal path instead of linked node path
-	
-	cerr << setw(4) << permLength << setw(10) << currentCost;
-	cerr << setw(10) << arm1Len << setw(10) << arm2Len;
-	cerr << setw(10) << mstCost << setw(10) << totalEst << "  " << promise << '\n';
+	totalEst = currentCost + mstCost + arm1Len + arm2Len;
 
-	if(totalEst > bestCost){
-		return !promise;
+	if(totalEst >= bestCost){
+		promise = false;
 	}
+	// for (size_t i = 0; i < path.size(); ++i)
+    // 	cerr << setw(2) << path[i] << ' ';
+	// cerr << setw(4) << permLength << setw(10) << currentCost;
+	// cerr << setw(10) << arm1Len << setw(10) << arm2Len;
+	// cerr << setw(10) << mstCost << setw(10) << totalEst << "  " << promise << '\n';
 	return promise;
 }
 
@@ -274,45 +280,31 @@ void path::distTable(){
 	}
 }
 
-void path::genPerms(size_t permLength) {//change to normal path from linked node path
-	if (permLength == path.size()) {
-		double weight = currentCost + distanceT[path[permLength-1]][path[0]];
-		if(weight < bestCost){
-			bestCost = weight;
+void path::genPerms(size_t permLength) {
+	if (permLength == (size_t)numPokemon) {
+		if(totalEst <= bestCost){
+			bestCost = totalEst;
 			boundingPath = path;
 		}
+		return;
 	}
 	if (!promising(permLength))
 		return;
 	for (size_t i = permLength; i < path.size(); ++i) {
 		swap(path[permLength],path[i]);
-		currentCost += distanceT[i][permLength];
-
 		genPerms(permLength + 1);
-		
-		currentCost -= distanceT[i][permLength]; //swap back
 		swap(path[permLength],path[i]);
 	}
 }
 
-void path::optTsp(){//change to normal path from linked node path
+void path::optTsp(){
 	upperBoundGen();
-	path = {1,2,3,4,5,6,7,8,9,10,0};
-	bestCost = 336.74;
 	boundingPath = path;
 	distTable();
 	genPerms(1);
-	int start = 0;
-	double cost = 0.0;
-	do {
-		cost += distanceT[start][path[start]];
-		start = path[start];
-	}while(start != 0);
-	cout << cost << '\n';
-
-	do {
-    	cout << start << ' ';
-    	start = boundingPath[start];
-	} while (start != 0);
+	cout << bestCost << '\n';
+	for (size_t i = 0; i < boundingPath.size(); ++i){
+    	cout << boundingPath[i] << ' ';
+	}
 	
 }
